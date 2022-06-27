@@ -1,20 +1,24 @@
-#pragma once
-#include <stdint.h>
+#include "paging.h"
 
-struct PageDirectoryEntry {
-    bool Present : 1;
-    bool ReadWrite : 1;
-    bool UserSuper : 1;
-    bool WriteThrough : 1;
-    bool CacheDisabled : 1;
-    bool Accessed : 1;
-    bool ignore0 : 1; 
-    bool LargerPages : 1;
-    bool ingore1 : 1;
-    uint8_t Available : 3;
-    uint64_t Address : 52;
-};
+void PageDirectoryEntry::SetFlag(PT_Flag flag, bool enabled){
+    uint64_t bitSelector = (uint64_t)1 << flag;
+    Value &= ~bitSelector;
+    if (enabled){
+        Value |= bitSelector;
+    }
+}
 
-struct PageTable { 
-    PageDirectoryEntry entries [512];
-}__attribute__((aligned(0x1000)));
+bool PageDirectoryEntry::GetFlag(PT_Flag flag){
+    uint64_t bitSelector = (uint64_t)1 << flag;
+    return Value & bitSelector > 0 ? true : false;
+}
+
+uint64_t PageDirectoryEntry::GetAddress(){
+    return (Value & 0x000ffffffffff000) >> 12;
+}
+
+void PageDirectoryEntry::SetAddress(uint64_t address){
+    address &= 0x000000ffffffffff;
+    Value &= 0xfff0000000000fff;
+    Value |= (address << 12);
+}
