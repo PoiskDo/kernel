@@ -1,9 +1,7 @@
-//used poncho's code
-
 #pragma once
 #include "math.h"
 #include "Framebuffer.h"
-#include "simpleFonts.h"
+#include "simpleFonts.h" 
 
 class BasicRenderer{
     public:
@@ -15,3 +13,5 @@ class BasicRenderer{
     void Print(const char* str);
     void PutChar(char chr, unsigned int xOff, unsigned int yOff);
 };
+
+extern BasicRenderer* GlobalRenderer;
