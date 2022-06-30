@@ -1,5 +1,7 @@
 #include "BasicRenderer.h"
 
+BasicRenderer* GlobalRenderer;
+
 BasicRenderer::BasicRenderer(Framebuffer* targetFramebuffer, PSF1_FONT* psf1_Font)
 {
     TargetFramebuffer = targetFramebuffer;
@@ -9,9 +11,9 @@ BasicRenderer::BasicRenderer(Framebuffer* targetFramebuffer, PSF1_FONT* psf1_Fon
 }
 
 void BasicRenderer::Print(const char* str)
-{    
+{
     
-    char* chr = (char*) str;
+    char* chr = (char*)str;
     while(*chr != 0){
         PutChar(*chr, CursorPosition.X, CursorPosition.Y);
         CursorPosition.X+=8;
