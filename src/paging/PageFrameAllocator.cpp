@@ -33,11 +33,11 @@ void PageFrameAllocator::ReadEFIMemoryMap(EFI_MEMORY_DESCRIPTOR* mMap, size_t mM
 
     InitBitmap(bitmapSize, largestFreeMemSeg);
 
-    LockPages(&PageBitmap, PageBitmap.Size / 4096 + 1);
+    LockPages(PageBitmap.Buffer, PageBitmap.Size / 4096 + 1);
 
     for (int i = 0; i < mMapEntries; i++){
         EFI_MEMORY_DESCRIPTOR* desc = (EFI_MEMORY_DESCRIPTOR*)((uint64_t)mMap + (i * mMapDescSize));
-        if (desc->type != 7){ // not efiConventionalMemory
+        if (desc->type != 7){ 
             ReservePages(desc->physAddr, desc->numPages);
         }
     }
@@ -58,7 +58,7 @@ void* PageFrameAllocator::RequestPage(){
         return (void*)(pageBitmapIndex * 4096);
     }
 
-    return NULL; // Page Frame Swap to file
+    return NULL; // page frame swap
 }
 
 void PageFrameAllocator::FreePage(void* address){
