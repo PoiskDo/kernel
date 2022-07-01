@@ -1,27 +1,40 @@
 #include "interrupts.h"
 #include "../panic.h"
 #include "../IO.h"
+#include "../userinput/keyboard.h"
 
-__attribute__((interrupt)) void PageFault_Handler(struct interrupt_frame* frame){
+__attribute__((interrupt)) void PageFault_Handler(interrupt_frame* frame){
     Panic("Page Fault Detected");
     while(true);
 }
 
-__attribute__((interrupt)) void DoubleFault_Handler(struct interrupt_frame* frame){
+__attribute__((interrupt)) void DoubleFault_Handler(interrupt_frame* frame){
     Panic("Double Fault Detected");
     while(true);
 }
 
-__attribute__((interrupt)) void GPFault_Handler(struct interrupt_frame* frame){
+__attribute__((interrupt)) void GPFault_Handler(interrupt_frame* frame){
     Panic("General Protection Fault Detected");
     while(true);
 }
 
-__attribute__((interrupt)) void KeyboardInt_Handler(struct interrupt_frame* frame){
-    GlobalRenderer->Print("Pressed");
+__attribute__((interrupt)) void KeyboardInt_Handler(interrupt_frame* frame){
     uint8_t scancode = inb(0x60);
+
+    HandleKeyboard(scancode);
+
     PIC_EndMaster();
 }
+
+__attribute__((interrupt)) void MouseInt_Handler(interrupt_frame* frame){
+
+    uint8_t mouseData = inb(0x60);
+
+    HandlePS2Mouse(mouseData);
+
+    PIC_EndSlave();
+}
+
 
 void PIC_EndMaster(){
     outb(PIC1_COMMAND, PIC_EOI);
@@ -31,13 +44,14 @@ void PIC_EndSlave(){
     outb(PIC2_COMMAND, PIC_EOI);
     outb(PIC1_COMMAND, PIC_EOI);
 }
+   
 
 void RemapPIC(){
-    uint8_t al, al2;
+    uint8_t a1, a2; 
 
-    al = inb(PIC1_DATA);
+    a1 = inb(PIC1_DATA);
     io_wait();
-    al2 = inb(PIC2_DATA);
+    a2 = inb(PIC2_DATA);
     io_wait();
 
     outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);
@@ -60,8 +74,8 @@ void RemapPIC(){
     outb(PIC2_DATA, ICW4_8086);
     io_wait();
 
-    outb(PIC1_DATA, al);
+    outb(PIC1_DATA, a1);
     io_wait();
-    outb(PIC2_DATA, al2);
+    outb(PIC2_DATA, a2);
 
 }
